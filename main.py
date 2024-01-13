@@ -82,7 +82,7 @@ class Life(Board):
                 s = 0
                 for dy in range(-1, 2):
                     for dx in range(-1, 2):
-                        if self.choice_life == 'Жизнь':
+                        if self.choice_life == 'Жизнь' or self.choice_life == 'Лабиринт':
                             if x + dx < 0 or x + dx >= self.width or y + dy < 0 or y + dy >= self.height:
                                 continue
                             s += self.board[y + dy][x + dx]
@@ -90,11 +90,18 @@ class Life(Board):
                             new_x = (x + dx) % self.width
                             new_y = (y + dy) % self.height
                             s += self.board[new_y][new_x]
+
                 s -= self.board[y][x]
-                if s == 3:
-                    tmp_board[y][x] = 1
-                elif s < 2 or s > 3:
-                    tmp_board[y][x] = 0
+                if self.choice_life == 'Жизнь' or self.choice_life == 'Жизнь на торе':
+                    if s == 3:
+                        tmp_board[y][x] = 1
+                    elif s < 2 or s > 3:
+                        tmp_board[y][x] = 0
+                elif self.choice_life == 'Лабиринт':
+                    if s == 3 and self.board[y][x] == 0:
+                        tmp_board[y][x] = 1
+                    elif (s < 1 or s > 4) and self.board[y][x] == 1:
+                        tmp_board[y][x] = 0
         # обновляем поле
         self.board = copy.deepcopy(tmp_board)
 
@@ -108,6 +115,8 @@ def start_life(choice_life):
         pygame.display.set_caption('Игра «Жизнь»')
     elif choice_life == 'Жизнь на торе':
         pygame.display.set_caption('Игра «Жизнь на торе»')
+    elif choice_life == 'Лабиринт':
+        pygame.display.set_caption('Игра «Лабиринт»')
     random_sells = False
     board = Life(26, 26, 10, 10, 30, random_sells, choice_life)
     random_button = ImageButton(400, 700, 252, 74, 'Рандом', './data/orange_button.jpg', './data/orange_button_1.png')
@@ -282,7 +291,7 @@ def choice_game():
     main_background = pygame.image.load('./data/fon.jpg')
     life_button = ImageButton(30, 100, 200, 70, 'Жизнь', './data/orange_button.jpg', './data/orange_button_1.png')
     life_on_thor = ImageButton(250, 100, 200, 70, 'Жизнь на торе', './data/orange_button.jpg', './data/orange_button_1.png')
-    # life_on_thor2 = ImageButton(470, 100, 200, 70, 'Жизнь на торе', './data/orange_button.jpg', './data/orange_button_1.png')
+    labyrinth = ImageButton(470, 100, 200, 70, 'Лабиринт', './data/orange_button.jpg', './data/orange_button_1.png')
     back_button = ImageButton(width / 2 - (252 / 2), 350, 252, 74, 'Назад', './data/red_button.jpg', './data/red_button_1.jpg')
     running = True
     while running:
@@ -311,10 +320,12 @@ def choice_game():
                     start_life('Жизнь')
                 if event.button == life_on_thor:
                     start_life('Жизнь на торе')
+                if event.button == labyrinth:
+                    start_life('Лабиринт')
 
-            for btn in [back_button, life_button, life_on_thor]:
+            for btn in [back_button, life_button, life_on_thor, labyrinth]:
                 btn.handle_event(event)
-        for btn in [back_button, life_button, life_on_thor]:
+        for btn in [back_button, life_button, life_on_thor, labyrinth]:
             btn.check_hover(pygame.mouse.get_pos())
             btn.draw(screen)
 
