@@ -4,6 +4,45 @@ import random
 import copy
 
 
+class Input:
+    def __init__(self, x, y, w, h, font_color=(255, 255, 255), active_color=(255, 0, 0), inactive_color=(150, 150, 150),
+                 text=''):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = inactive_color
+        self.text = text
+        self.font_color = font_color
+        self.active_color = active_color
+        self.inactive_color = inactive_color
+        self.txt_surface = pygame.font.Font(None, 32).render(text, True, self.font_color)
+        self.active = False
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                self.active = not self.active
+            else:
+                self.active = False
+            self.color = self.active_color if self.active else self.inactive_color
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_RETURN:
+                    print(self.text)
+                    self.text = ''
+                elif event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                else:
+                    self.text += event.unicode in [str(i) for i in range(0, 9)] and event.unicode or ''
+                self.txt_surface = pygame.font.Font(None, 32).render(self.text, True, self.font_color)
+
+    def update(self):
+        width = max(200, self.txt_surface.get_width() + 10)
+        self.rect.w = width
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect, 2)
+        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
+
+
 class Board:
     def __init__(self, width, height, left, top, cell_size, random_sells, choice_life):
         self.width = width
@@ -246,7 +285,8 @@ def main_menu():
                                  './data/orange_button_1.png')
     settings_button = ImageButton(width / 2 - (252 / 2), 200, 252, 74, 'Настройки', './data/orange_button.jpg',
                                   './data/orange_button_1.png')
-    exit_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Выйти', './data/red_button.jpg', './data/red_button_1.jpg')
+    exit_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Выйти', './data/red_button.jpg',
+                              './data/red_button_1.jpg')
     running = True
     while running:
         screen.fill((0, 0, 0))
@@ -290,9 +330,11 @@ def choice_game():
     pygame.display.set_caption('Выбор игры')
     main_background = pygame.image.load('./data/fon.jpg')
     life_button = ImageButton(30, 100, 200, 70, 'Жизнь', './data/orange_button.jpg', './data/orange_button_1.png')
-    life_on_thor = ImageButton(250, 100, 200, 70, 'Жизнь на торе', './data/orange_button.jpg', './data/orange_button_1.png')
+    life_on_thor = ImageButton(250, 100, 200, 70, 'Жизнь на торе', './data/orange_button.jpg',
+                               './data/orange_button_1.png')
     labyrinth = ImageButton(470, 100, 200, 70, 'Лабиринт', './data/orange_button.jpg', './data/orange_button_1.png')
-    back_button = ImageButton(width / 2 - (252 / 2), 350, 252, 74, 'Назад', './data/red_button.jpg', './data/red_button_1.jpg')
+    back_button = ImageButton(width / 2 - (252 / 2), 350, 252, 74, 'Назад', './data/red_button.jpg',
+                              './data/red_button_1.jpg')
     running = True
     while running:
         screen.fill((0, 0, 0))
@@ -340,7 +382,9 @@ def settings_menu():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption('Настроки')
     main_background = pygame.image.load('./data/fon.jpg')
-    back_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Назад', './data/red_button.jpg', './data/red_button_1.jpg')
+    back_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Назад', './data/red_button.jpg',
+                              './data/red_button_1.jpg')
+    size_input = Input(width / 2 - (252 / 2), 250, 252, 30)
     running = True
     while running:
         screen.fill((0, 0, 0))
@@ -350,8 +394,10 @@ def settings_menu():
         text_surfase = font.render('Настройки', True, (255, 255, 255))
         text_rect = text_surfase.get_rect(center=(300, 50))
         screen.blit(text_surfase, text_rect)
+        size_input.draw(screen)
 
         for event in pygame.event.get():
+            size_input.handle_event(event)
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
