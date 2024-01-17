@@ -29,9 +29,11 @@ class Input:
                     print(self.text)
                     self.text = ''
                 elif event.key == pygame.K_BACKSPACE:
-                    self.text = self.text[:-1]
+                    if len(self.text) > 0:
+                        self.text = self.text[:-1]
                 else:
-                    self.text += event.unicode in [str(i) for i in range(0, 9)] and event.unicode or ''
+                    if len(self.text) < 12 and event.unicode.isdigit():
+                        self.text += event.unicode
                 self.txt_surface = pygame.font.Font(None, 32).render(self.text, True, self.font_color)
 
     def update(self):
@@ -39,7 +41,7 @@ class Input:
         self.rect.w = width
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect, 2)
+        pygame.draw.rect(screen, self.color, self.rect, 3)
         screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
 
 
@@ -384,15 +386,19 @@ def settings_menu():
     main_background = pygame.image.load('./data/fon.jpg')
     back_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Назад', './data/red_button.jpg',
                               './data/red_button_1.jpg')
-    size_input = Input(width / 2 - (252 / 2), 250, 252, 30)
+    size_input = Input(200, 210, 180, 30)
     running = True
     while running:
         screen.fill((0, 0, 0))
 
         screen.blit(main_background, (-800, -100))
         font = pygame.font.Font(None, 72)
+        font1 = pygame.font.Font(None, 36)
         text_surfase = font.render('Настройки', True, (255, 255, 255))
         text_rect = text_surfase.get_rect(center=(300, 50))
+        text_sive = font1.render('Введите размер поля:', True, (255, 255, 255))
+        text_rect1 = text_surfase.get_rect(center=(300, 200))
+        screen.blit(text_sive, text_rect1)
         screen.blit(text_surfase, text_rect)
         size_input.draw(screen)
 
