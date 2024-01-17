@@ -4,6 +4,46 @@ import random
 import copy
 
 
+class Input:
+    def __init__(self, x, y, w, h, font_color=(255, 255, 255), active_color=(255, 0, 0), inactive_color=(150, 150, 150),
+                 text=''):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = inactive_color
+        self.text = text
+        self.font_color = font_color
+        self.active_color = active_color
+        self.inactive_color = inactive_color
+        self.txt_surface = pygame.font.Font(None, 32).render(text, True, self.font_color)
+        self.active = False
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                self.active = not self.active
+            else:
+                self.active = False
+            self.color = self.active_color if self.active else self.inactive_color
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                if event.key == pygame.K_RETURN:
+                    print(self.text)
+                    self.text = ''
+                elif event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                else:
+                    if len(self.text) < 10 and event.unicode.isdigit():
+                        self.text += event.unicode
+                self.txt_surface = pygame.font.Font(None, 32).render(self.text, True, self.font_color)
+
+    def update(self):
+        width = max(200, self.txt_surface.get_width() + 10)
+        self.rect.w = width
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect, 3)
+        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
+
+
 class Board:
     def __init__(self, width, height, left, top, cell_size, random_sells, choice_life):
         self.width = width
@@ -82,7 +122,7 @@ class Life(Board):
                 s = 0
                 for dy in range(-1, 2):
                     for dx in range(-1, 2):
-                        if self.choice_life == 'Жизнь' or self.choice_life == 'Лабиринт':
+                        if self.choice_life == 'Жизнь' or self.choice_life == 'Лабиринт' or self.choice_life == 'Тест':
                             if x + dx < 0 or x + dx >= self.width or y + dy < 0 or y + dy >= self.height:
                                 continue
                             s += self.board[y + dy][x + dx]
@@ -102,6 +142,11 @@ class Life(Board):
                         tmp_board[y][x] = 1
                     elif (s < 1 or s > 4) and self.board[y][x] == 1:
                         tmp_board[y][x] = 0
+                elif self.choice_life == 'Тест':
+                    if s == 3 and self.board[y][x] == 0:
+                        tmp_board[y][x] = 1
+                    elif (s < 2 or s > 5) and self.board[y][x] == 1:
+                        tmp_board[y][x] = 0
         # обновляем поле
         self.board = copy.deepcopy(tmp_board)
 
@@ -117,6 +162,8 @@ def start_life(choice_life):
         pygame.display.set_caption('Игра «Жизнь на торе»')
     elif choice_life == 'Лабиринт':
         pygame.display.set_caption('Игра «Лабиринт»')
+    elif choice_life == 'Тест':
+        pygame.display.set_caption('Игра «Тест»')
     random_sells = False
     board = Life(26, 26, 10, 10, 30, random_sells, choice_life)
     random_button = ImageButton(400, 700, 252, 74, 'Рандом', './data/orange_button.jpg', './data/orange_button_1.png')
@@ -246,7 +293,8 @@ def main_menu():
                                  './data/orange_button_1.png')
     settings_button = ImageButton(width / 2 - (252 / 2), 200, 252, 74, 'Настройки', './data/orange_button.jpg',
                                   './data/orange_button_1.png')
-    exit_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Выйти', './data/red_button.jpg', './data/red_button_1.jpg')
+    exit_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Выйти', './data/red_button.jpg',
+                              './data/red_button_1.jpg')
     running = True
     while running:
         screen.fill((0, 0, 0))
@@ -290,9 +338,12 @@ def choice_game():
     pygame.display.set_caption('Выбор игры')
     main_background = pygame.image.load('./data/fon.jpg')
     life_button = ImageButton(30, 100, 200, 70, 'Жизнь', './data/orange_button.jpg', './data/orange_button_1.png')
-    life_on_thor = ImageButton(250, 100, 200, 70, 'Жизнь на торе', './data/orange_button.jpg', './data/orange_button_1.png')
+    life_on_thor = ImageButton(250, 100, 200, 70, 'Жизнь на торе', './data/orange_button.jpg',
+                               './data/orange_button_1.png')
     labyrinth = ImageButton(470, 100, 200, 70, 'Лабиринт', './data/orange_button.jpg', './data/orange_button_1.png')
-    back_button = ImageButton(width / 2 - (252 / 2), 350, 252, 74, 'Назад', './data/red_button.jpg', './data/red_button_1.jpg')
+    test = ImageButton(30, 200, 200, 70, 'Тест', './data/orange_button.jpg', './data/orange_button_1.png')
+    back_button = ImageButton(width / 2 - (252 / 2), 350, 252, 74, 'Назад', './data/red_button.jpg',
+                              './data/red_button_1.jpg')
     running = True
     while running:
         screen.fill((0, 0, 0))
@@ -322,10 +373,12 @@ def choice_game():
                     start_life('Жизнь на торе')
                 if event.button == labyrinth:
                     start_life('Лабиринт')
+                if event.button == test:
+                    start_life('Тест')
 
-            for btn in [back_button, life_button, life_on_thor, labyrinth]:
+            for btn in [back_button, life_button, life_on_thor, labyrinth, test]:
                 btn.handle_event(event)
-        for btn in [back_button, life_button, life_on_thor, labyrinth]:
+        for btn in [back_button, life_button, life_on_thor, labyrinth, test]:
             btn.check_hover(pygame.mouse.get_pos())
             btn.draw(screen)
 
@@ -340,18 +393,26 @@ def settings_menu():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption('Настроки')
     main_background = pygame.image.load('./data/fon.jpg')
-    back_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Назад', './data/red_button.jpg', './data/red_button_1.jpg')
+    back_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Назад', './data/red_button.jpg',
+                              './data/red_button_1.jpg')
+    size_input = Input(220, 140, 150, 30)
     running = True
     while running:
         screen.fill((0, 0, 0))
 
         screen.blit(main_background, (-800, -100))
         font = pygame.font.Font(None, 72)
+        font1 = pygame.font.Font(None, 40)
         text_surfase = font.render('Настройки', True, (255, 255, 255))
+        text_description = font1.render('Введите количество клеток на поле:', True, (255, 255, 255))
         text_rect = text_surfase.get_rect(center=(300, 50))
         screen.blit(text_surfase, text_rect)
+        text_rect = text_description.get_rect(center=(300, 100))
+        screen.blit(text_description, text_rect)
+        size_input.draw(screen)
 
         for event in pygame.event.get():
+            size_input.handle_event(event)
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
