@@ -4,44 +4,39 @@ import random
 import copy
 
 
-class Input:
-    def __init__(self, x, y, w, h, font_color=(255, 255, 255), active_color=(255, 0, 0), inactive_color=(150, 150, 150),
-                 text=''):
-        self.rect = pygame.Rect(x, y, w, h)
-        self.color = inactive_color
-        self.text = text
-        self.font_color = font_color
-        self.active_color = active_color
-        self.inactive_color = inactive_color
-        self.txt_surface = pygame.font.Font(None, 32).render(text, True, self.font_color)
-        self.active = False
+class FUCKINGINPUT:
+    # shitty dumbass input fast
+    def __init__(self, width, height, left, top):
+        self.width = width
+        self.height = height
+        self.left = left
+        self.top = top
+        self.input_grabbed = False
+        self.rect = None
+        self.text = ""
+        self.font = pygame.font.SysFont(None, 8)
+
+    def render(self, screen):
+        self.rendered = self.font.render("test")
+        self.rect = pygame.draw.rect(screen, (255, 255, 255), (self.left, self.top, self.width, self.height))
+        pygame.draw.rect(self.rendered, (0,0,255), self.rendered.get_rect(), 1)
+        screen.blit(self.rendered, (self.top, self.left))
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rect.collidepoint(event.pos):
-                self.active = not self.active
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            print("mousebutton1down")
+            if self.rect.collidepoint(pygame.mouse.get_pos()):
+                if self.input_grabbed:
+                    return
+                self.text = ""
+                self.input_grabbed = True
             else:
-                self.active = False
-            self.color = self.active_color if self.active else self.inactive_color
-        if event.type == pygame.KEYDOWN:
-            if self.active:
-                if event.key == pygame.K_RETURN:
-                    print(self.text)
-                    self.text = ''
-                elif event.key == pygame.K_BACKSPACE:
-                    self.text = self.text[:-1]
-                else:
-                    self.text += event.unicode in [str(i) for i in range(0, 9)] and event.unicode or ''
-                self.txt_surface = pygame.font.Font(None, 32).render(self.text, True, self.font_color)
-
-    def update(self):
-        width = max(200, self.txt_surface.get_width() + 10)
-        self.rect.w = width
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect, 2)
-        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
-
+                self.input_grabbed = False
+        elif event.type == pygame.KEYDOWN:
+            #щаа сделаю
+            if event.key > 0x10ffff:
+                return
+            self.text += chr(event.key)
 
 class Board:
     def __init__(self, width, height, left, top, cell_size, random_sells, choice_life):
@@ -384,18 +379,18 @@ def settings_menu():
     main_background = pygame.image.load('./data/fon.jpg')
     back_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Назад', './data/red_button.jpg',
                               './data/red_button_1.jpg')
-    size_input = Input(width / 2 - (252 / 2), 250, 252, 30)
+    size_input = FUCKINGINPUT(150,40,150,100)
+
     running = True
     while running:
         screen.fill((0, 0, 0))
-
         screen.blit(main_background, (-800, -100))
         font = pygame.font.Font(None, 72)
         text_surfase = font.render('Настройки', True, (255, 255, 255))
         text_rect = text_surfase.get_rect(center=(300, 50))
         screen.blit(text_surfase, text_rect)
-        size_input.draw(screen)
 
+        size_input.render(screen)
         for event in pygame.event.get():
             size_input.handle_event(event)
             if event.type == pygame.QUIT:
