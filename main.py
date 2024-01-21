@@ -103,7 +103,6 @@ class Life(Board):
         for y in range(self.height):
             for x in range(self.width):
                 if self.board[y][x]:
-                    # живые клетки рисуем зелеными
                     pygame.draw.rect(screen, pygame.Color("green"),
                                      (x * self.cell_size + self.left, y * self.cell_size + self.top,
                                       self.cell_size,
@@ -114,12 +113,9 @@ class Life(Board):
                                   self.cell_size), 1)
 
     def next_move(self):
-        # сохраняем поле
         tmp_board = copy.deepcopy(self.board)
-        # пересчитываем
         for y in range(self.height):
             for x in range(self.width):
-                # сумма окружающих клеток
                 s = 0
                 for dy in range(-1, 2):
                     for dx in range(-1, 2):
@@ -143,7 +139,6 @@ class Life(Board):
                         tmp_board[y][x] = 1
                     elif (s < 1 or s > 4) and self.board[y][x] == 1:
                         tmp_board[y][x] = 0
-        # обновляем поле
         self.board = copy.deepcopy(tmp_board)
 
 
@@ -162,7 +157,6 @@ def start_life(choice_life):
     board = Life(26, 26, 10, 10, 30, random_sells, choice_life)
     random_button = ImageButton(400, 700, 252, 74, 'Рандом', './data/orange_button.jpg', './data/orange_button_1.png')
     clear_button = ImageButton(100, 700, 252, 74, 'Очистить', './data/orange_button.jpg', './data/orange_button_1.png')
-    # Включено ли обновление поля
     time_on = False
     ticks = 0
     speed = 10
@@ -190,33 +184,28 @@ def start_life(choice_life):
                 if event.button == random_button:
                     random_sells = True
                     board = Life(26, 26, 10, 10, 30, random_sells, choice_life)
-                    button_clicked = not button_clicked  # Инвертируем флаг после нажатия
-                    # Восстанавливаем видимость и активность кнопки
+                    button_clicked = not button_clicked
                     random_button.visible = True
                     random_button.active = True
                 if event.button == clear_button:
                     random_sells = False
                     board = Life(26, 26, 10, 10, 30, random_sells, choice_life)
-                    button_clicked = not button_clicked  # Инвертируем флаг после нажатия
-                    # Восстанавливаем видимость и активность кнопки
+                    button_clicked = not button_clicked
                     clear_button.visible = True
                     clear_button.active = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_v or event.key == pygame.K_SPACE:
-                    # Если кнопка была скрыта, восстанавливаем её видимость и активность
                     if not random_button.visible:
                         random_button.visible = True
                         random_button.active = True
                         clear_button.visible = True
                         clear_button.active = True
                     else:
-                        # Иначе скрываем и делаем неактивной
                         random_button.visible = False
                         random_button.active = False
                         clear_button.visible = False
                         clear_button.active = False
                 if game_play:
-                    # Иначе скрываем и делаем неактивной
                     random_button.visible = False
                     random_button.active = False
                     clear_button.visible = False
@@ -254,8 +243,8 @@ class ImageButton:
             self.hover_image = pygame.transform.scale(self.hover_image, (width, height))
         self.rect = self.image.get_rect(topleft=(x, y))
         self.sound = None
-        self.visible = True  # Добавлен флаг видимости
-        self.active = True  # Добавлен флаг активности
+        self.visible = True
+        self.active = True
 
     def draw(self, screen):
         if self.visible:
@@ -325,9 +314,7 @@ def main_menu():
 
 def choice_game():
     pygame.init()
-
     width, height = 700, 500
-
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption('Выбор игры')
     main_background = pygame.image.load('./data/fon.jpg')
@@ -340,7 +327,6 @@ def choice_game():
     running = True
     while running:
         screen.fill((0, 0, 0))
-
         screen.blit(main_background, (-800, -100))
         font = pygame.font.Font(None, 72)
         text_surfase = font.render('Выбор игры', True, (255, 255, 255))
@@ -386,24 +372,18 @@ def settings_menu():
     main_background = pygame.image.load('./data/fon.jpg')
     back_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Назад', './data/red_button.jpg',
                               './data/red_button_1.jpg')
-    size_input = Input(200, 210, 180, 30)
+    size_button = ImageButton(width / 2 - (275 / 2), 120, 275, 60, 'Изменить размер поля', './data/orange_button.jpg',
+                              './data/orange_button_1.png')
     running = True
     while running:
         screen.fill((0, 0, 0))
-
         screen.blit(main_background, (-800, -100))
         font = pygame.font.Font(None, 72)
-        font1 = pygame.font.Font(None, 36)
         text_surfase = font.render('Настройки', True, (255, 255, 255))
         text_rect = text_surfase.get_rect(center=(300, 50))
-        text_sive = font1.render('Введите размер поля:', True, (255, 255, 255))
-        text_rect1 = text_surfase.get_rect(center=(300, 200))
-        screen.blit(text_sive, text_rect1)
         screen.blit(text_surfase, text_rect)
-        size_input.draw(screen)
 
         for event in pygame.event.get():
-            size_input.handle_event(event)
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
@@ -416,9 +396,59 @@ def settings_menu():
                 if event.button == back_button:
                     running = False
                     main_menu()
-            for btn in [back_button]:
+                if event.button == size_button:
+                    running = False
+                    settings_menu_size()
+            for btn in [back_button, size_button]:
                 btn.handle_event(event)
-        for btn in [back_button]:
+        for btn in [back_button, size_button]:
+            btn.check_hover(pygame.mouse.get_pos())
+            btn.draw(screen)
+
+        pygame.display.flip()
+
+
+def settings_menu_size():
+    pygame.init()
+
+    width, height = 600, 500
+
+    screen = pygame.display.set_mode((width, height))
+    pygame.display.set_caption('Настройка размера')
+    main_background = pygame.image.load('./data/fon.jpg')
+    back_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Назад', './data/red_button.jpg',
+                              './data/red_button_1.jpg')
+    confirm_button = ImageButton(width / 2 - (170 / 2), 160, 170, 50, 'Подтвердить', './data/orange_button.jpg',
+                                 './data/orange_button_1.png')
+    size_input = Input(width / 2 - (180 / 2), 110, 180, 30)
+    running = True
+    while running:
+        screen.fill((0, 0, 0))
+        screen.blit(main_background, (-800, -100))
+        font1 = pygame.font.Font(None, 72)
+        text_sive = font1.render('Введите размер поля:', True, (255, 255, 255))
+        text_rect1 = text_sive.get_rect(center=(300, 60))
+        screen.blit(text_sive, text_rect1)
+        size_input.draw(screen)
+        for event in pygame.event.get():
+            size_input.handle_event(event)
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                    settings_menu()
+            if event.type == pygame.USEREVENT:
+                if event.button == back_button:
+                    running = False
+                    settings_menu()
+                if event.button == confirm_button:
+                    ...
+            for btn in [back_button, confirm_button]:
+                btn.handle_event(event)
+        for btn in [back_button, confirm_button]:
             btn.check_hover(pygame.mouse.get_pos())
             btn.draw(screen)
 
