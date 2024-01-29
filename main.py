@@ -3,10 +3,12 @@ import pygame
 import random
 import copy
 
+board_size = 26
+
 
 class Input:
     def __init__(self, x, y, w, h, font_color=(255, 255, 255), active_color=(255, 0, 0), inactive_color=(150, 150, 150),
-                 text=''):
+                 text='', changed=None):
         self.rect = pygame.Rect(x, y, w, h)
         self.color = inactive_color
         self.text = text
@@ -15,6 +17,7 @@ class Input:
         self.inactive_color = inactive_color
         self.txt_surface = pygame.font.Font(None, 32).render(text, True, self.font_color)
         self.active = False
+        self.changed = changed
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -34,6 +37,8 @@ class Input:
                 else:
                     if len(self.text) < 12 and event.unicode.isdigit():
                         self.text += event.unicode
+                if self.changed:
+                    self.changed(self.text)
                 self.txt_surface = pygame.font.Font(None, 32).render(self.text, True, self.font_color)
 
     def update(self):
@@ -143,9 +148,10 @@ class Life(Board):
 
 
 def start_life(choice_life):
+    global board_size
     pygame.init()
-    size = 800, 800
-    screen = pygame.display.set_mode(size)
+    size = (30 * board_size) + 20
+    screen = pygame.display.set_mode((size, size))
     clock = pygame.time.Clock()
     if choice_life == 'Жизнь':
         pygame.display.set_caption('Игра «Жизнь»')
@@ -154,7 +160,7 @@ def start_life(choice_life):
     elif choice_life == 'Лабиринт':
         pygame.display.set_caption('Игра «Лабиринт»')
     random_sells = False
-    board = Life(26, 26, 10, 10, 30, random_sells, choice_life)
+    board = Life(board_size, board_size, 10, 10, 30, random_sells, choice_life)
     random_button = ImageButton(400, 700, 252, 74, 'Рандом', './data/orange_button.jpg', './data/orange_button_1.png')
     clear_button = ImageButton(100, 700, 252, 74, 'Очистить', './data/orange_button.jpg', './data/orange_button_1.png')
     time_on = False
@@ -408,6 +414,11 @@ def settings_menu():
         pygame.display.flip()
 
 
+def changed(x):
+    global board_size
+    board_size = int(x)
+
+
 def settings_menu_size():
     pygame.init()
 
@@ -418,9 +429,7 @@ def settings_menu_size():
     main_background = pygame.image.load('./data/fon.jpg')
     back_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Назад', './data/red_button.jpg',
                               './data/red_button_1.jpg')
-    confirm_button = ImageButton(width / 2 - (170 / 2), 160, 170, 50, 'Подтвердить', './data/orange_button.jpg',
-                                 './data/orange_button_1.png')
-    size_input = Input(width / 2 - (180 / 2), 110, 180, 30)
+    size_input = Input(width / 2 - (180 / 2), 110, 180, 30, text=str(board_size), changed=changed)
     running = True
     while running:
         screen.fill((0, 0, 0))
@@ -444,11 +453,9 @@ def settings_menu_size():
                 if event.button == back_button:
                     running = False
                     settings_menu()
-                if event.button == confirm_button:
-                    ...
-            for btn in [back_button, confirm_button]:
+            for btn in [back_button]:
                 btn.handle_event(event)
-        for btn in [back_button, confirm_button]:
+        for btn in [back_button]:
             btn.check_hover(pygame.mouse.get_pos())
             btn.draw(screen)
 
