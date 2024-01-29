@@ -416,7 +416,7 @@ def settings_menu():
 
 def changed(x):
     global board_size
-    board_size = int(x)
+    board_size = int(x and x or 0)
 
 
 def settings_menu_size():
