@@ -2,6 +2,7 @@ import sys
 import pygame
 
 from components.imagebutton import ImageButton
+from components.input import Input
 from components.life import Life
 
 board_size = 26
@@ -10,28 +11,46 @@ board_size = 26
 def start_life(choice_life):
     global board_size
     pygame.init()
-    size = (30 * board_size) + 20
-    screen = pygame.display.set_mode((size, size))
+    screen_width = 1050
+    screen_height = 900
+    size = 800
+    cell_size = (size - 10) // board_size
+    screen = pygame.display.set_mode((screen_width, screen_height))
     clock = pygame.time.Clock()
-    if choice_life == 'Жизнь':
-        pygame.display.set_caption('Игра «Жизнь»')
-    elif choice_life == 'Жизнь на торе':
-        pygame.display.set_caption('Игра «Жизнь на торе»')
-    elif choice_life == 'Лабиринт':
-        pygame.display.set_caption('Игра «Лабиринт»')
+    if choice_life:
+        pygame.display.set_caption(f'Игра «{choice_life}»')
     random_sells = False
-    board = Life(board_size, board_size, 10, 10, 30, random_sells, choice_life)
-    random_button = ImageButton(400, 700, 252, 74, 'Рандом', './data/orange_button.jpg', './data/orange_button_1.png')
-    clear_button = ImageButton(100, 700, 252, 74, 'Очистить', './data/orange_button.jpg', './data/orange_button_1.png')
+    board = Life(board_size, board_size, 10, 10, cell_size, random_sells, choice_life)
+    clear_button = ImageButton(30, 800, 180, 50, 'Очистить', './data/orange_button.jpg', './data/orange_button_1.png')
+    random_button = ImageButton(240, 800, 180, 50, 'Рандом', './data/orange_button.jpg', './data/orange_button_1.png')
+    start_button = ImageButton(450, 800, 180, 50, 'Старт', './data/green_button.png', './data/green_button1.png')
+    speed_button = ImageButton(870, 140, 40, 40, '+', './data/orange_button.jpg', './data/orange_button_1.png')
+    speed_button2 = ImageButton(870, 230, 40, 40, '-', './data/orange_button.jpg', './data/orange_button_1.png')
+    exit_button = ImageButton(660, 800, 180, 50, 'Выйти', './data/red_button.jpg', './data/red_button_1.jpg')
     time_on = False
     ticks = 0
     speed = 10
+    speed_screen = 10
+    score = 0
     button_clicked = False
     game_play = False
     running = True
     while running:
         screen.fill((0, 0, 0))
         board.render(screen)
+        font = pygame.font.Font(None, 30)
+        text_surfase = font.render(f'Скорость: {speed_screen}', True, (255, 255, 255))
+        text_rect = text_surfase.get_rect(center=(865, 30))
+        screen.blit(text_surfase, text_rect)
+        text_surfase2 = font.render(f'Счёт: {score}', True, (255, 255, 255))
+        text_rect2 = text_surfase.get_rect(center=(865, 60))
+        screen.blit(text_surfase2, text_rect2)
+        text_surfase3 = font.render(f'Добавить скорость:', True, (255, 255, 255))
+        text_rect3 = text_surfase.get_rect(center=(865, 120))
+        screen.blit(text_surfase3, text_rect3)
+        text_surfase4 = font.render(f'Уменьшить скорость:', True, (255, 255, 255))
+        text_rect4 = text_surfase.get_rect(center=(865, 210))
+        screen.blit(text_surfase4, text_rect4)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -39,48 +58,43 @@ def start_life(choice_life):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 board.get_click(event.pos)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE or event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            if (
+                    event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE or
+                    event.type == pygame.MOUSEBUTTONDOWN and event.button == 3) or (
+                    event.type == pygame.USEREVENT and event.button == start_button):
                 time_on = not time_on
                 game_play = not game_play
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:
+                if not random_button.active:
+                    random_button.active = True
+                    clear_button.active = True
+                else:
+                    random_button.active = False
+                    clear_button.active = False
+            if (event.type == pygame.MOUSEBUTTONDOWN and event.button == 4) or (
+                    event.type == pygame.USEREVENT and event.button == speed_button2):
                 speed += 1
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:
+                speed_screen -= 1
+            if (event.type == pygame.MOUSEBUTTONDOWN and event.button == 5) or (
+                    event.type == pygame.USEREVENT and event.button == speed_button):
                 speed -= 1
+                speed_screen += 1
             if event.type == pygame.USEREVENT:
                 if event.button == random_button:
                     random_sells = True
-                    board = Life(26, 26, 10, 10, 30, random_sells, choice_life)
+                    board = Life(board_size, board_size, 10, 10, cell_size, random_sells, choice_life)
                     button_clicked = not button_clicked
-                    random_button.visible = True
                     random_button.active = True
                 if event.button == clear_button:
                     random_sells = False
-                    board = Life(26, 26, 10, 10, 30, random_sells, choice_life)
+                    board = Life(board_size, board_size, 10, 10, cell_size, random_sells, choice_life)
                     button_clicked = not button_clicked
-                    clear_button.visible = True
                     clear_button.active = True
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_v or event.key == pygame.K_SPACE:
-                    if not random_button.visible:
-                        random_button.visible = True
-                        random_button.active = True
-                        clear_button.visible = True
-                        clear_button.active = True
-                    else:
-                        random_button.visible = False
-                        random_button.active = False
-                        clear_button.visible = False
-                        clear_button.active = False
-                if game_play:
-                    random_button.visible = False
-                    random_button.active = False
-                    clear_button.visible = False
-                    clear_button.active = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            if (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or (
+                    event.type == pygame.USEREVENT and event.button == exit_button):
                 main_menu()
-            for btn in [random_button, clear_button]:
+            for btn in [random_button, clear_button, start_button, speed_button, speed_button2, exit_button]:
                 btn.handle_event(event)
-        for btn in [random_button, clear_button]:
+        for btn in [random_button, clear_button, start_button, speed_button, speed_button2, exit_button]:
             btn.check_hover(pygame.mouse.get_pos())
             btn.draw(screen)
         if ticks >= speed:
@@ -101,7 +115,7 @@ def main_menu():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption('Главное меню')
     main_background = pygame.image.load('./data/fon.jpg')
-    connect_button = ImageButton(width / 2 - (252 / 2), 100, 252, 74, 'Подключиться', './data/orange_button.jpg',
+    connect_button = ImageButton(width / 2 - (252 / 2), 100, 252, 74, 'Выбрать игру', './data/orange_button.jpg',
                                  './data/orange_button_1.png')
     settings_button = ImageButton(width / 2 - (252 / 2), 200, 252, 74, 'Настройки', './data/orange_button.jpg',
                                   './data/orange_button_1.png')
