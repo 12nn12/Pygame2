@@ -10,6 +10,8 @@ board_size = 26
 
 def start_life(choice_life):
     global board_size
+    if board_size <= 0:
+        board_size = 26
     pygame.init()
     screen_width = 1050
     screen_height = 900
@@ -27,6 +29,12 @@ def start_life(choice_life):
     speed_button = ImageButton(870, 140, 40, 40, '+', './data/orange_button.jpg', './data/orange_button_1.png')
     speed_button2 = ImageButton(870, 230, 40, 40, '-', './data/orange_button.jpg', './data/orange_button_1.png')
     exit_button = ImageButton(660, 800, 180, 50, 'Выйти', './data/red_button.jpg', './data/red_button_1.jpg')
+    clear_button2 = ImageButton(30, 800, 180, 50, 'Очистить', './data/gray_button.png', './data/gray_button.png')
+    random_button2 = ImageButton(240, 800, 180, 50, 'Рандом', './data/gray_button.png', './data/gray_button.png')
+    start_button2 = ImageButton(450, 800, 180, 50, 'Пауза', './data/orange_button.jpg', './data/orange_button_1.png')
+    random_button2.visible = False
+    clear_button2.visible = False
+    start_button2.visible = False
     time_on = False
     ticks = 0
     speed = 10
@@ -61,15 +69,28 @@ def start_life(choice_life):
             if (
                     event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE or
                     event.type == pygame.MOUSEBUTTONDOWN and event.button == 3) or (
-                    event.type == pygame.USEREVENT and event.button == start_button):
+                    event.type == pygame.USEREVENT and event.button == start_button) or (
+                    event.type == pygame.USEREVENT and event.button == start_button2):
                 time_on = not time_on
                 game_play = not game_play
                 if not random_button.active:
                     random_button.active = True
                     clear_button.active = True
+                    random_button.visible = True
+                    clear_button.visible = True
+                    start_button.visible = True
+                    random_button2.visible = False
+                    clear_button2.visible = False
+                    start_button2.visible = False
                 else:
                     random_button.active = False
                     clear_button.active = False
+                    random_button.visible = False
+                    clear_button.visible = False
+                    start_button.visible = False
+                    random_button2.visible = True
+                    clear_button2.visible = True
+                    start_button2.visible = True
             if (event.type == pygame.MOUSEBUTTONDOWN and event.button == 4) or (
                     event.type == pygame.USEREVENT and event.button == speed_button2):
                 speed += 1
@@ -92,9 +113,11 @@ def start_life(choice_life):
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or (
                     event.type == pygame.USEREVENT and event.button == exit_button):
                 main_menu()
-            for btn in [random_button, clear_button, start_button, speed_button, speed_button2, exit_button]:
+            for btn in [random_button, clear_button, start_button, speed_button, speed_button2, exit_button,
+                        random_button2, clear_button2, start_button2]:
                 btn.handle_event(event)
-        for btn in [random_button, clear_button, start_button, speed_button, speed_button2, exit_button]:
+        for btn in [random_button, clear_button, start_button, speed_button, speed_button2, exit_button, random_button2,
+                    clear_button2, start_button2]:
             btn.check_hover(pygame.mouse.get_pos())
             btn.draw(screen)
         if ticks >= speed:
@@ -257,6 +280,7 @@ def changed(x):
 
 
 def settings_menu_size():
+    global board_size
     pygame.init()
 
     width, height = 600, 500
@@ -266,6 +290,8 @@ def settings_menu_size():
     main_background = pygame.image.load('./data/fon.jpg')
     back_button = ImageButton(width / 2 - (252 / 2), 300, 252, 74, 'Назад', './data/red_button.jpg',
                               './data/red_button_1.jpg')
+    size_button = ImageButton(width / 2 - (165 / 2), 160, 165, 45, 'Подтвердить', './data/green_button.png',
+                              './data/green_button1.png')
     size_input = Input(width / 2 - (180 / 2), 110, 180, 30, text=str(board_size), changed=changed)
     running = True
     while running:
@@ -290,9 +316,12 @@ def settings_menu_size():
                 if event.button == back_button:
                     running = False
                     settings_menu()
-            for btn in [back_button]:
+                if event.button == size_button:
+                    running = False
+                    settings_menu()
+            for btn in [back_button, size_button]:
                 btn.handle_event(event)
-        for btn in [back_button]:
+        for btn in [back_button, size_button]:
             btn.check_hover(pygame.mouse.get_pos())
             btn.draw(screen)
 
