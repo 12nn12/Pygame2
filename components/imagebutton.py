@@ -1,9 +1,9 @@
 import pygame
-
+import gif_pygame
 
 class ImageButton:
 
-    def __init__(self, x, y, width, height, text, image_path, hover_image_path=None):
+    def __init__(self, x, y, width, height, text, image_path, hover_image_path=None, gif=None):
         self.x = x
         self.y = y
         self.width = width
@@ -12,11 +12,13 @@ class ImageButton:
         self.image = pygame.image.load(image_path)
         self.image = pygame.transform.scale(self.image, (width, height))
         self.hover_image = self.image
+        self.gif = None
         if hover_image_path:
             self.hover_image = pygame.image.load(hover_image_path)
             self.hover_image = pygame.transform.scale(self.hover_image, (width, height))
+        if gif:
+            self.gif = gif_pygame.load(gif)
         self.rect = self.image.get_rect(topleft=(x, y))
-        self.sound = None
         self.visible = True
         self.active = True
 
@@ -24,6 +26,8 @@ class ImageButton:
         if self.visible:
             current_image = self.hover_image if self.is_hovered else self.image
             screen.blit(current_image, self.rect.topleft)
+            if self.is_hovered and self.gif:
+                self.gif.render(screen, (self.x, self.y + self.height + 20))
 
             font = pygame.font.Font(None, 36)
             text_surface = font.render(self.text, True, (255, 255, 255))

@@ -39,7 +39,6 @@ def start_life(choice_life):
     ticks = 0
     speed = 10
     speed_screen = 10
-    score = 0
     button_clicked = False
     game_play = False
     running = True
@@ -50,9 +49,6 @@ def start_life(choice_life):
         text_surfase = font.render(f'Скорость: {speed_screen}', True, (255, 255, 255))
         text_rect = text_surfase.get_rect(center=(865, 30))
         screen.blit(text_surfase, text_rect)
-        text_surfase2 = font.render(f'Счёт: {score}', True, (255, 255, 255))
-        text_rect2 = text_surfase.get_rect(center=(865, 60))
-        screen.blit(text_surfase2, text_rect2)
         text_surfase3 = font.render(f'Добавить скорость:', True, (255, 255, 255))
         text_rect3 = text_surfase.get_rect(center=(865, 120))
         screen.blit(text_surfase3, text_rect3)
@@ -184,10 +180,12 @@ def choice_game():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption('Выбор игры')
     main_background = pygame.image.load('./data/fon.jpg')
-    life_button = ImageButton(30, 100, 200, 70, 'Жизнь', './data/orange_button.jpg', './data/orange_button_1.png')
+    life_button = ImageButton(30, 100, 200, 70, 'Жизнь', './data/orange_button.jpg', './data/orange_button_1.png',
+                              './data/Life.gif')
     life_on_thor = ImageButton(250, 100, 200, 70, 'Жизнь на торе', './data/orange_button.jpg',
-                               './data/orange_button_1.png')
-    labyrinth = ImageButton(470, 100, 200, 70, 'Лабиринт', './data/orange_button.jpg', './data/orange_button_1.png')
+                               './data/orange_button_1.png', './data/Life_on_thor.gif')
+    labyrinth = ImageButton(470, 100, 200, 70, 'Лабиринт', './data/orange_button.jpg', './data/orange_button_1.png',
+                            './data/labyrinth.gif')
     back_button = ImageButton(width / 2 - (252 / 2), 350, 252, 74, 'Назад', './data/red_button.jpg',
                               './data/red_button_1.jpg')
     running = True
@@ -281,6 +279,7 @@ def changed(x):
 
 def settings_menu_size():
     global board_size
+    size = board_size
     pygame.init()
 
     width, height = 600, 500
@@ -315,6 +314,7 @@ def settings_menu_size():
             if event.type == pygame.USEREVENT:
                 if event.button == back_button:
                     running = False
+                    board_size = size
                     settings_menu()
                 if event.button == size_button:
                     running = False
