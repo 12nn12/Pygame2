@@ -318,6 +318,8 @@ def settings_menu_size():
                     settings_menu()
                 if event.button == size_button:
                     running = False
+                    if board_size <= 4:
+                        board_size = 26
                     settings_menu()
             for btn in [back_button, size_button]:
                 btn.handle_event(event)
